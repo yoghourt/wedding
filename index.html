@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0"/>
+	<title>陈跃夫－婚礼邀请函</title>
+	<script type="text/javascript">
+		window.loadingStartTime = new Date();
+	</script>
+	<link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+	<div id="loading" class="loading">
+		<div id="progress" class="progress">
+			0%
+		</div>
+	</div>
+	<div id="page" class="page">
+		<div class="device-ct">
+			<div class="sound-box"></div>
+			<div class="dish"></div>
+			<div class="dish"></div>
+			<div class="sound-box"></div>
+		</div>
+		<div id="img-container" class="img-container">
+			<img id="img" class="img" src="">
+			<div id="box1" class="box"></div>
+			<div id="box2" class="box"></div>
+			<div id="box3" class="box"></div>
+			<div id="box4" class="box"></div>
+		</div>
+		<div class="welcome-text-ct">
+			<p class="welcome-text" data-text="2017年10月2日<br>山西繁峙县砂河镇利民小区<br>陈跃夫 郝亚楠 婚礼<br>诚邀光临"></p>
+		</div>
+	</div>
+	<audio id="music" src="media/Nas - If I Ruled The World (Instrumental).mp3" controls="" hidden=""></audio>
+	<script >
+		var music = document.querySelector("#music");
+		var $page = document.querySelector("#page");
+		var pageW = $page.clientWidth;
+		var pageH = $page.clientHeight;
+		var $loading = document.querySelector('#loading')
+		var $progress = document.querySelector('#progress');
+		var $imgContainer = document.querySelector("#img-container");
+		var $img = document.querySelector("#img");
+		var $box = document.querySelectorAll(".box");
+		var $welcomeTextCT = document.querySelector(".welcome-text-ct");
+		var $welcomeText = document.querySelector(".welcome-text");
+		var $deviceCT = document.querySelector(".device-ct");
+		var prg = 0;
+		var timer = 0;
+		var now = new Date();
+		var timeout = 5000;
+		var next = prg;
+
+		var img_arr = ['img/1.jpg','img/2.jpg','img/3.jpg','img/4.jpg','img/5.jpg','img/6.jpg','img/7.jpg','img/8.jpg','img/9.jpg',
+			'img/10.jpg'];
+		var nums = img_arr.length;
+		var start = 0;
+		for(var i in img_arr){
+			var img = new Image();
+			img.src = img_arr[i];
+			(function(j){
+				img.onload = function(){
+					start++;
+					if(start == nums){
+						complete();
+					}
+					add(25, [1, 3], 200);
+				}
+			})(i);
+		}
+
+
+		function random(n){
+			if( typeof n === 'object'){
+				var times = n[1] - n[0]
+				var offset = n[0]
+				return parseInt(Math.random()*(times+1) + offset,10)
+			}else{
+				return n
+			}
+		}
+
+		function add (dist, speed, delay ,callback){
+			var _dist = random(dist)
+			if(next + _dist > 100){
+				next = 100
+			}else{
+				next += _dist
+			}
+			progress (dist, speed,delay, callback)
+		}
+
+		function progress (dist, speed,delay, callback){
+			var _dist = random(dist)
+			var _delay = random(delay)
+			var _speed = random(speed)
+			window.clearTimeout(timer)
+			timer = window.setTimeout(function(){
+				if(prg + _speed >= _dist){
+				window.clearTimeout(timer)
+				prg = _dist;
+				callback && callback();
+				}else{
+					prg += _speed;
+					progress(_dist, speed, delay, callback)
+				}
+
+			  $progress.innerHTML = prg + '%';
+
+			},_delay)
+		}
+
+		function complete(){
+			progress(100,[1,5],10,function(){
+				window.setTimeout(function(){
+					$loading.style.display = 'none';
+					appInit();
+				},100)	
+			})
+		}
+		function setImg(index,boxStart){
+			var boxTop = random([0,$imgContainer.clientHeight -100]);
+			var boxLeft = random([0,$imgContainer.clientWidth - 100]);
+			$box[boxStart].style.top = boxTop + 'px';
+			$box[boxStart].style.left = boxLeft + 'px';
+			$box[boxStart].style.backgroundImage = 'url('+img_arr[index]+')';
+			$box[boxStart].style.backgroundPosition = '-'+boxLeft+'px -'+boxTop+'px';
+			$box[boxStart].style.backgroundSize = ''+$imgContainer.clientWidth+'px '+$imgContainer.clientHeight+'px';
+			$box[boxStart].style.opacity = 1;
+			
+		}
+		var i = 0;
+		function typing(){
+			var index = 0;
+			var text = $welcomeText.getAttribute("data-text");
+			if( i <= text.length){
+				$welcomeText.innerHTML = text.slice(0,i++) + '_';
+				setTimeout('typing()',170); 
+			}else{
+				$welcomeText.innerHTML = text;
+			}
+		}
+
+		function changeImgTask(){
+			var index = random([0,img_arr.length - 1]);
+			$img.src = img_arr[index];
+			$img.style.opacity = 0;
+			var boxStart = 0;
+			var boxTimer = setInterval(function(){
+				if(boxStart >= 4){
+					clearInterval(boxTimer);
+					$img.style.opacity = 1;
+					for(var i= 0,len = $box.length ;i< len; i ++){
+				        $box[i].style.opacity= 0;
+
+					}
+					boxStart = 0;
+				}
+				else{
+					setImg(index,boxStart);
+				}
+				boxStart++;
+			},500)
+		}
+		function appInit(){
+			music.play();
+			typing();
+			var appTime = setInterval(function(){
+				var time = music.currentTime;
+				if(time > 9 && time <= 9.1){
+					$welcomeTextCT.style.display = "none";
+					$deviceCT.style.opacity = 1;
+				}
+				if(time > 6 && time <= 6.1){
+					var imgsTimer = setInterval(function(){
+						changeImgTask();
+					},3500);
+				}
+			},100)
+				
+		}
+
+		if(now - loadingStartTime > timeout){
+			complete();
+
+		}else{
+			window.setTimeout(function(){
+				complete()
+			},timeout - (now - loadingStartTime))
+		}
+	</script>
+</body>
+</html>
